@@ -21,7 +21,7 @@ func main() {
 }
 
 func getFileNames() []string {
-	files, err := os.ReadDir("./")
+	files, err := os.ReadDir("./notes")
 
 	if err != nil {
 		fmt.Printf("Error reading directory :(")
@@ -53,7 +53,6 @@ func getNotes(fileNames []string) []string {
 
 		if err != nil {
 			fmt.Printf("Error reading note %v", note)
-
 			continue
 		}
 
