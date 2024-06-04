@@ -2,14 +2,17 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
 )
 
 func main() {
-	fileNames := getFileNames()
-	notes := getNotes(fileNames)
+	filesDirectory := flag.String("dir", "./notes", "files directory")
+
+	fileNames := getFileNames(filesDirectory, ".txt")
+	notes := getFiles(filesDirectory, fileNames)
 
 	var searchInput string
 
@@ -17,11 +20,12 @@ func main() {
 
 	fmt.Scan(&searchInput)
 
-	searchNotes(notes, searchInput)
+	searchFiles(notes, searchInput)
 }
 
-func getFileNames() []string {
-	files, err := os.ReadDir("./notes")
+func getFileNames(dir *string, ext string) []string {
+
+	files, err := os.ReadDir(*dir)
 
 	if err != nil {
 		fmt.Printf("Error reading directory :(")
@@ -37,7 +41,7 @@ func getFileNames() []string {
 
 		fileName := file.Name()
 
-		if strings.HasSuffix(fileName, ".txt") {
+		if strings.HasSuffix(fileName, ext) {
 			fileNames = append(fileNames, fileName)
 		}
 	}
@@ -45,34 +49,34 @@ func getFileNames() []string {
 	return fileNames
 }
 
-func getNotes(fileNames []string) []string {
-	var notes []string
+func getFiles(dir *string, fileNames []string) []string {
+	var files []string
 
-	for _, noteName := range fileNames {
-		note, err := os.Open(noteName)
+	for _, fileName := range fileNames {
+		file, err := os.Open(fmt.Sprintf("%v/%v", dir, fileName))
 
 		if err != nil {
-			fmt.Printf("Error reading note %v", note)
+			fmt.Printf("Error reading file %v: %v", fileName, err)
 			continue
 		}
 
-		defer note.Close()
+		defer file.Close()
 
-		scanner := bufio.NewScanner(note)
+		scanner := bufio.NewScanner(file)
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			notes = append(notes, line)
+			files = append(files, line)
 		}
 	}
 
-	return notes
+	return files
 }
 
-func searchNotes(notes []string, input string) {
-	for _, note := range notes {
-		if strings.Contains(strings.ToLower(note), input) {
-			fmt.Printf("%v\n\n", note)
+func searchFiles(files []string, input string) {
+	for _, file := range files {
+		if strings.Contains(strings.ToLower(file), strings.ToLower(input)) {
+			fmt.Printf("%v\n\n", file)
 		}
 	}
 }
